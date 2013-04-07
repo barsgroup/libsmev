@@ -16,7 +16,7 @@ setup(
                  "somewhat less paingful"),
     license="BSD",
     keywords="lxml smev m3 bars",
-    long_description=read('README'),
+    long_description=read('README.rst'),
     packages=['libsmev'],
     install_requires=['libxml2-python >= 2.6.9', 'lxml >= 3.1.0'],
     classifiers=(
