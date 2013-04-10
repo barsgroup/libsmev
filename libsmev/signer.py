@@ -3,7 +3,6 @@
 import base64
 
 from lxml import etree
-from django.utils.encoding import force_unicode
 
 from helpers import run_cmd, tags
 from skeleton import make_node_with_ns
