@@ -18,7 +18,7 @@ setup(
     keywords="lxml smev m3 bars",
     long_description=read('README.rst'),
     packages=['libsmev'],
-    install_requires=['libxml2-python >= 2.6.9', 'lxml >= 3.1.0'],
+    install_requires=['libxml2-python >= 2.6.9', 'lxml >= 3.1.0', 'requests >= 1.1.0'],
     classifiers=(
         'Development Status :: 4 - Beta',
         'Environment :: Console',
