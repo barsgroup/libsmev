@@ -5,7 +5,7 @@ import copy
 from lxml import etree
 from datetime import datetime
 
-from helpers import make_node, extract_smev_parts, tag_single
+from helpers import make_node, extract_smev_parts, tag_single, dict_to_xmldoc
 from namespaces import NS_MAP, make_node_with_ns
 
 
@@ -49,10 +49,8 @@ def convert_smev_request(envelope, from_ver='2.5.6', to_ver=None):
         name_node = msg_data_node.xpath('//smev:Service/smev:Mnemonic', namespaces=NS_MAP)
         if name_node:
             name = name_node[0].text
-
         servicename_node = smev_node('ServiceName')
         servicename_node.text = name
-
         service_node.getparent().remove(service_node)
         msg_node.insert(3,  servicename_node)
 
@@ -175,6 +173,27 @@ def extract_context_from_envelope(envelope):
 
 
 def construct_smev_envelope(action_name, context, nsmap=None, version='2.5.6'):
+    u'''
+    Составления обертки СМЭВ-сообщения на основе переданного контекста и имени
+    блока с данными.
+
+    @param  action_name     Имя блока, содержащего данные сообщения.
+    @type   action_name     unicode
+
+    @param  context     Словарь с данными заголовка СМЭВ-сообщения.
+    @type   context     dict
+
+    @param  nsmap   Карта пространств имен XML-документа.
+    @type   nsmap   dict
+
+    @param  version     Версия методических рекомендаций, используемая при 
+                        создании обертки сообщения.
+    @type   version     unicode
+
+    @return Созданное СМЭВ-сообщение.
+    @rtype  lxml.Element
+    '''
+
     required_fields = [
         'Sender',
         'Recipient',
@@ -220,7 +239,6 @@ def construct_smev_envelope(action_name, context, nsmap=None, version='2.5.6'):
     sender_node = etree.Element("{%s}Sender" % _ns_map['smev'])
     sender_code_node = etree.Element("{%s}Code" % _ns_map['smev'])
     sender_name_node = etree.Element("{%s}Name" % _ns_map['smev'])
-
     sender_code_node.text = context['Sender']['Code']
     sender_name_node.text = context['Sender']['Name']
 
@@ -228,7 +246,6 @@ def construct_smev_envelope(action_name, context, nsmap=None, version='2.5.6'):
     recipient_node = etree.Element("{%s}Recipient" % _ns_map['smev'])
     recipient_code_node = etree.Element("{%s}Code" % _ns_map['smev'])
     recipient_name_node = etree.Element("{%s}Name" % _ns_map['smev'])
-
     recipient_code_node.text = context['Recipient']['Code']
     recipient_name_node.text = context['Recipient']['Name']
 
@@ -238,7 +255,6 @@ def construct_smev_envelope(action_name, context, nsmap=None, version='2.5.6'):
     originator_node = etree.Element("{%s}Originator" % _ns_map['smev'])
     originator_code_node = etree.Element("{%s}Code" % _ns_map['smev'])
     originator_name_node = etree.Element("{%s}Name" % _ns_map['smev'])
-
     originator_code_node.text = context['Originator']['Code']
     originator_name_node.text = context['Originator']['Name']
 
@@ -247,10 +263,9 @@ def construct_smev_envelope(action_name, context, nsmap=None, version='2.5.6'):
         service_node = etree.Element("{%s}Service" % _ns_map['smev'])
         service_mnemonic_node = etree.Element("{%s}Mnemonic" % _ns_map['smev'])
         service_version_node = etree.Element("{%s}Version" % _ns_map['smev'])
-
         service_mnemonic_node.text = context['Service']['Mnemonic']
         service_version_node.text = context['Service']['Version']
-
+        
         service_node.extend([
             service_mnemonic_node,
             service_version_node])
@@ -286,7 +301,6 @@ def construct_smev_envelope(action_name, context, nsmap=None, version='2.5.6'):
         testmsg_node.text = 'true'
 
     messagedata_node = etree.Element("{%s}MessageData" % _ns_map['smev'])
-
     appdata_node = etree.Element("{%s}AppData" % _ns_map['smev'], attrib={"{%s}Id" % _ns_map['wsu']: "AppData"})
     app_document_node = etree.Element("{%s}AppDocument" % _ns_map['smev'])
     binarydata_node = etree.Element("{%s}BinaryData" % _ns_map['smev'])
@@ -296,7 +310,6 @@ def construct_smev_envelope(action_name, context, nsmap=None, version='2.5.6'):
     if app_document is not None:
         if isinstance(app_document, dict):
             requestcode_node.text = app_document['RequestCode'] or ''
-
             binarydata_node.text = app_document['BinaryData'] or ''
         else:
             app_document_node.text = app_document or ''
@@ -341,16 +354,58 @@ def construct_smev_envelope(action_name, context, nsmap=None, version='2.5.6'):
         message_node.append(casenumber_node)
 
     own_section_node = etree.Element("{%s}%s" % (_ns_map['inf'], action_name), nsmap=_ns_map)
-
     own_section_node.extend([
         message_node,
         messagedata_node])
 
     body_node.append(
         own_section_node)
-
     envelope.extend([
         header_node,
         body_node])
 
     return envelope
+
+
+def construct_error_reply(original_req, err_code, msg, custom_status=None):
+    u'''
+    Создание ответ на СМЭВ-сообщение, который будет содержать в себе 
+    код и сообщение об ошибке.
+
+    @param  original_req    СМЭВ-сообщение, на которое формируется ответ.
+    @type   original_req    lxml.Element
+
+    @param  err_code    Код сообщения об ошибке.
+    @type   err_code    unicode
+
+    @param  msg    Текст сообщения об ошибке.
+    @type   msg    unicode
+
+    @param  custom_status    Статус в заголовке СМЭВ-сообщения.
+    @type   custom_status    unicode
+
+    @return Ответное сообщение об ошибке.
+    @rtype  lxml.Element
+    '''
+
+    reply_ctx = extract_context_from_envelope(original_req)
+
+    recipient_code = reply_ctx['Recipient']['Code']
+    recipient_name = reply_ctx['Recipient']['Name']
+
+    reply_ctx['Recipient']['Code'] = reply_ctx['Sender']['Code']
+    reply_ctx['Recipient']['Name'] = reply_ctx['Sender']['Name']
+
+    reply_ctx['Sender']['Code'] = recipient_code
+    reply_ctx['Sender']['Name'] = recipient_name
+
+    reply_ctx['Status'] = custom_status or 'REJECT'
+
+    reply_req = construct_smev_envelope('Error', reply_ctx)
+    appdata_node = tag_single(reply_req, './/smev:AppData')
+
+    dict_to_xmldoc(appdata_node, {
+                   '__ns__': 'inf', 
+                   'Error': dict(errorCode=err_code, errorMessage=msg)})
+
+    return reply_req

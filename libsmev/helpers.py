@@ -220,3 +220,7 @@ def dict_to_xmldoc(node, d, inherited_ns=None):
         else:
             sub_node.text = unicode(v)
         node.append(sub_node)
+
+
+def xmldoc_to_dict(node):
+    pass

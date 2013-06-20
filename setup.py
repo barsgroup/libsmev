@@ -9,10 +9,10 @@ def read(fn):
 
 setup(
     name='libsmev',
-    version='0.1.2',
+    version='0.1.3',
     author='Borisov Kirill',
     author_email='borisov@bars-open.ru',
-    description=("Library of low-level helpers that make integration with SMEV"
+    description=("Library of low-level helpers that make integration with SMEV "
                  "somewhat less painful"),
     license="BSD",
     keywords="lxml smev m3 bars",
