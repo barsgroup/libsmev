@@ -153,6 +153,26 @@ def get_text_digest(text):
     return base64.b64encode(out)
 
 
+def get_file_digest(fn):
+    u'''
+    Получение текстового представления хэш-кода переданного файла
+    по ГОСТ Р 34.11-94.
+
+    @param  fn    Путь к файлу, хэш-код которого необходимо получить.
+    @type   fn    unicode
+
+    @return Закодированный в base64 хэш-код текста.
+    @rtype  unicode
+    '''
+    openssl_sign_cmd = ['openssl', 'dgst', '-binary', '-md_gost94', fn]
+
+    out, err = run_cmd(openssl_sign_cmd)
+    if err:
+        raise ValueError(u'OpenSSL error: %s' % err)
+
+    return base64.b64encode(out)
+
+
 def construct_wsse_header(digest=None, signature=None, certificate=None):
     u'''
     Формирование в виде дерева XML-элементов заголовка WS-Security.
