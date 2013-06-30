@@ -47,25 +47,26 @@ def encode_directory(directory):
 
     applied_documents_node = make_node('AppliedDocuments')
     for (path, subdirs, files) in os.walk(directory):
-        for fn in files:
+        for fn in files:            
             path_to_file = os.path.join(path, fn).replace('\\', '/').replace('\\\\', '/')
-            dgst = get_file_digest(path_to_file)            
+            relative_path = path_to_file[len(directory):].lstrip('/')
+            dgst = get_file_digest(path_to_file)
             dot_pos = fn.find('.')
 
             applied_documents = [
                 {
-                    'URL': path_to_file,
+                    'URL': relative_path,
                     'Name': fn,
                     'DigestValue': dgst,
                     # Пытаемся определить MIME-тип файла, но если нет - бинарный файл.
-                    'Type': mime_types_map.get(fn[dot_pos-1:], 'application/octet-stream'),
+                    'Type': mime_types_map.get(fn[dot_pos:], 'application/octet-stream'),
                     # TODO: выяснить правила генерации кода документа
                     'CodeDocument': u'0000',
                     'Number': i,
                 },
                 # Файл с подписью по PKCS/7
                 {
-                    'URL': u'%s%s' % (path_to_file, '.sig'),
+                    'URL': u'%s%s' % (relative_path, '.sig'),
                     'Name': u'%s.sig' % fn,
                     'DigestValue': get_text_digest(dgst),
                     'Type': 'application/x-pkcs7-signature',
@@ -81,8 +82,8 @@ def encode_directory(directory):
                 applied_documents_node.append(app_doc_node)
 
             # Добавляем в ZIP-архив файл и его подпись
-            zip_arc.write(path_to_file, arcname=path_to_file)
-            zip_arc.writestr('%s.sig' % path_to_file, dgst)
+            zip_arc.write(path_to_file, arcname=relative_path)
+            zip_arc.writestr('%s.sig' % relative_path, dgst)
 
     # Добавляем в ZIP-архив манифест и его подпись
     manifest_str = etree.tostring(applied_documents_node, pretty_print=True)

@@ -1,16 +1,22 @@
 #coding: utf-8
 
+import shutil
+import base64
+import StringIO
+import uuid
 import unittest
 import os
+import zipfile
 
 from lxml import etree
-
-from tempfile import NamedTemporaryFile
+from mimetypes import types_map
+from tempfile import NamedTemporaryFile, mkdtemp
 
 from skeleton import construct_smev_envelope
 from helpers import dict_to_xmldoc
 from namespaces import NS_MAP
-from signer import sign_document, verify_envelope_signature
+from signer import sign_document, verify_envelope_signature, get_text_digest
+from attachments import encode_directory, extract_directory
 
 # Тестовый ключ
 PEM = r'''
@@ -163,6 +169,72 @@ class TestSigner(unittest.TestCase):
 
     def tearDown(self):
         os.remove(self.tmp_file.name)
+
+
+class TestAttachments(unittest.TestCase):
+    def setUp(self):
+        self.directory = mkdtemp()
+        self.files = ['%s%s' % (str(uuid.uuid4()), ext) for ext in types_map.keys()]
+
+        # Файл без расширения, по которому можно было бы определить MIME-тип        
+        
+        self.example_text = str(uuid.uuid4())
+        self.example_hash = get_text_digest(self.example_text)
+        self.example_sig_hash = get_text_digest(self.example_hash)
+
+        for fn in self.files:
+            with open(os.path.join(self.directory, fn), 'w') as f:
+                f.write(self.example_text)
+
+    def testEncode(self):        
+        req_code, encoded_zip = encode_directory(self.directory)
+        decoded_zip = base64.b64decode(encoded_zip)
+        sio = StringIO.StringIO(decoded_zip)
+        zip_arc = zipfile.ZipFile(sio, 'r')
+
+        for fn in self.files:
+            f = zip_arc.open(fn, 'r')
+            text = f.read()
+            f.close()
+
+            sig_f = zip_arc.open('%s.sig' % fn, 'r')
+            dgst_text = sig_f.read()
+            sig_f.close()
+
+            assert dgst_text == self.example_hash, u'Digests are not identical!'
+            assert text == self.example_text, u'Text in file is corrupted!'
+
+        with open('tmp.zip', 'wb') as f:
+            f.write(decoded_zip)
+
+    def testExtract(self):
+        req_code, encoded_zip = encode_directory(self.directory)
+        manifest, extracted_to = extract_directory(req_code, encoded_zip)
+
+        applied_documents_node = manifest.xpath('//AppliedDocuments')
+        assert applied_documents_node, '"AppliedDocuments" node not found!'
+        applied_documents = applied_documents_node[0].xpath('.//AppliedDocument')
+        assert applied_documents, 'No documents in manifest!'
+
+        for doc in applied_documents:
+            doc_info = dict([(n.tag, n.text) for n in doc])
+
+            if doc_info['URL'].endswith('.sig'):
+                assert doc_info['DigestValue'] == self.example_sig_hash, u'Digests are not identical!'
+            else:
+                assert doc_info['URL'] in self.files, u'Path "%s" outside of testing set!' % doc_info['URL']
+                assert doc_info['DigestValue'] == self.example_hash, u'Digests are not identical!'
+
+            dot_pos = doc_info['URL'].rindex('.')
+            if dot_pos:
+                ext = doc_info['URL'][dot_pos:]
+                if ext != '.sig':
+                    assert doc_info['Type'] == types_map[ext], 'Invalid MIME type "%s" for "%s"' % (doc_info['Type'], ext)
+            else:
+                assert doc_info['Type'] == 'application/octet-stream', 'File without extension not classified as octet-stream!'
+
+    def tearDown(self):
+        shutil.rmtree(self.directory)
 
 if __name__ == '__main__':
     unittest.main()
