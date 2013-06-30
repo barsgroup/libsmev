@@ -5,7 +5,7 @@ import subprocess
 from lxml import etree
 from lxml.etree import XMLSyntaxError
 
-from namespaces import NS_MAP, make_node_with_ns
+from namespaces import NS_MAP, REVERSE_NS_MAP, make_node_with_ns
 
 
 class Fault(Exception):
@@ -222,5 +222,61 @@ def dict_to_xmldoc(node, d, inherited_ns=None):
         node.append(sub_node)
 
 
-def xmldoc_to_dict(node):
-    pass
+def xmldoc_to_dict(node, include_ns=True, ns_map=REVERSE_NS_MAP):
+    u'''
+    Преобразование XML-элемента и всех подчиненных ему в древовидную
+    структуру внутри питоновского словаря. Пространства имен автоматически
+    определяются по переданной карте соответствий, где ключами являются
+    полноценные URL-ы к схемам, а значениями - кодовые имена пространств имен.
+
+    Если среди дочерних элементов узла встречаются 2 или более с одинаковыми
+    названиями, то в ключе будет храниться список из таких узлов.
+
+    Обратно совместим с dict_to_xmldoc.
+
+    @param  node    XML-элемент, который преобразуется в словарь.
+    @type   node    lxml.Element
+
+    @param  include_ns  Флаг сокрытия пространств имен элементов из конечного
+                        результата.
+    @type   include_ns  boolean
+
+    @param  ns_map      Карта соответсвия пространств имен кодовым идентификаторам.
+    @type   ns_map      dict вида {'http://schemas.xmlsoap.org/soap/envelope': 'SOAP-ENV'}
+    '''
+
+    def get_ns(n):
+        if n.tag[0] == '{':
+            ns, tag = n.tag[1:].split('}', 1)
+            return ns
+        return ''
+
+    def get_tag(n):
+        if n.tag[0] == '{':
+            ns, tag = n.tag.split('}', 1)
+            return tag
+        return n.tag
+
+    def flatten(d):
+        res = {}
+
+        for k, v in d.iteritems():
+            if isinstance(v, list) and len(v) == 1:
+                res[k] = v[0]
+            else:
+                res[k] = v
+        return res
+
+    result = {}
+
+    ns = get_ns(node)
+    if include_ns and ns:
+        result['__ns__'] = REVERSE_NS_MAP.get(ns, ns)
+
+    if len(node):
+        for child in node:
+            result.setdefault(get_tag(child), []).append(
+                xmldoc_to_dict(child, include_ns=include_ns))
+        return flatten(result)
+    else:
+        return node.text

@@ -12,4 +12,6 @@ NS_MAP = {
     "inf": "http://smev.gosuslugi.ru/inf/"
 }
 
+REVERSE_NS_MAP = dict([(v, k) for k, v in NS_MAP.items()])
+
 make_node_with_ns = lambda ns: lambda el_name: etree.Element('{%s}%s' % (NS_MAP[ns], el_name), nsmap={ns: NS_MAP[ns]})

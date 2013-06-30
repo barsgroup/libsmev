@@ -9,7 +9,7 @@ def read(fn):
 
 setup(
     name='libsmev',
-    version='0.1.4',
+    version='0.1.5',
     author='Borisov Kirill',
     author_email='borisov@bars-open.ru',
     description=("Library of low-level helpers that make integration with SMEV "
