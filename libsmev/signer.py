@@ -266,7 +266,7 @@ def construct_wsse_header(digest=None, signature=None, certificate=None):
     return security_node
 
 
-def sign_document(doc, priv_key_fn, priv_key_pass):
+def sign_document(doc, priv_key_fn, priv_key_pass, cert_file=None):
     u'''
     Подписание сообщения без вложения согласно ГОСТ Р 34.10-2001.
 
@@ -279,6 +279,9 @@ def sign_document(doc, priv_key_fn, priv_key_pass):
     @param  priv_key_pass   Пароль к частному ключу подписи.
     @type   priv_key_pass   unicode
 
+    @param cert_file    Путь к файлу с сертификатом.
+    @type cert_file     unicode
+
     @return Подписанный XML-документ.
     @rtype  lxml.Element
     '''
@@ -286,8 +289,12 @@ def sign_document(doc, priv_key_fn, priv_key_pass):
     security_node = tags(doc, '/SOAP-ENV:Envelope/SOAP-ENV:Header/wsse:Security')
 
     if not security_node:
-        with open(priv_key_fn, 'rb') as priv_key_file:
-            cert_data = load_cert_from_pem(priv_key_file.read())
+        if cert_file is not None:
+            with open(cert_file, 'rb') as cert_file_fh:
+                cert_data = load_cert_from_pem(cert_file_fh.read())
+        else:            
+            with open(priv_key_fn, 'rb') as priv_key_file:
+                cert_data = load_cert_from_pem(priv_key_file.read())
         wsse_header_node = construct_wsse_header(certificate=cert_data)
         header_node[0].append(wsse_header_node)
 
