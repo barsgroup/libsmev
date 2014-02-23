@@ -111,7 +111,7 @@ def parse_xml_string(xml_string, charset=u'utf-8',
     @type   charset     unicode
 
     @param  parser      Парсер, используемый для разбора строки.
-    @type   parser      function       
+    @type   parser      function
 
     @return Корень XML-документа.
     @rtype  lxml.Element
@@ -178,7 +178,7 @@ def extract_smev_parts(envelope):
     if security_node:
         security_node = security_node[0]
         token_node = tags(security_node, 'wsse:BinarySecurityToken')[0]
-        signature_node = tags(security_node, 'ds:signature_node')[0]
+        signature_node = tags(security_node, 'ds:Signature')[0]
     else:
         token_node = signature_node = None
 
