@@ -5,3 +5,5 @@ syntax: re
 ^.*\.key$
 ^.*\.zip$
 egg-info
+build/
+dist/
