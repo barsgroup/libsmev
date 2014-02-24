@@ -9,12 +9,12 @@ def read(fn):
 
 setup(
     name='libsmev',
-    version='0.1.6.1',
+    version='0.1.6.2',
     author='Borisov Kirill',
     author_email='borisov@bars-open.ru',
     description=("Library of low-level helpers that make integration with SMEV "
                  "somewhat less painful"),
-    license="BSD",
+    license="MIT",
     keywords="smev m3 bars",
     long_description=read('README.rst'),
     packages=['libsmev'],
