@@ -1,0 +1,12 @@
+image: bradrydzewski/python:2.7
+env:
+  - OPENSSL_CONF=/tmp/openssl.cnf
+script:
+  - pip install pytest
+  - python setup.py install
+  - rm -rf build
+  - cp /etc/ssl/openssl.cnf /tmp/openssl.cnf
+  - echo "openssl_conf = openssl_def" > /tmp/openssl.cnf
+  - cat /etc/ssl/openssl.cnf >> /tmp/openssl.cnf
+  - cat openssl.cnf.patch >> /tmp/openssl.cnf
+  - py.test
