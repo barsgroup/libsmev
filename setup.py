@@ -15,7 +15,7 @@ setup(
     description=("Library of low-level helpers that make integration with SMEV "
                  "somewhat less painful"),
     license="BSD",
-    keywords="lxml smev m3 bars drone",
+    keywords="smev m3 bars",
     long_description=read('README.rst'),
     packages=['libsmev'],
     install_requires=['lxml >= 3.1.0', 'requests >= 1.2.0'],
