@@ -1,0 +1,11 @@
+
+[openssl_def]
+engines = engine_section
+
+[engine_section]
+gost = gost_section
+
+[gost_section]
+engine_id = gost
+dynamic_path = ./gost.dll
+default_algorithms = ALL
