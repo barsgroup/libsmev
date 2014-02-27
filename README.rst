@@ -57,4 +57,5 @@ Windows
 
 - Сингатуллину Марселю <singatullinmt@bars-open.ru>
 
-.. image:: https://travis-ci.org/barsgroup/libsmev.png   :target: https://travis-ci.org/barsgroup/libsmev
+.. image:: https://travis-ci.org/barsgroup/libsmev.png   
+   :target: https://travis-ci.org/barsgroup/libsmev
