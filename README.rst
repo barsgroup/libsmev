@@ -56,3 +56,5 @@ Windows
 Особая благодарность:
 
 - Сингатуллину Марселю <singatullinmt@bars-open.ru>
+
+[![Build Status](https://travis-ci.org/barsgroup/libsmev.png)](https://travis-ci.org/barsgroup/libsmev)
