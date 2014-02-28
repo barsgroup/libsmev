@@ -5,7 +5,7 @@ python:
 env:
   - OPENSSL_CONF=/tmp/openssl.cnf
 install:
-  - pip install pytest
+  - pip install pytest pytest-cov coveralls
   - python setup.py install
   - rm -rf build
   - cp /etc/ssl/openssl.cnf /tmp/openssl.cnf
@@ -13,4 +13,6 @@ install:
   - cat /etc/ssl/openssl.cnf >> /tmp/openssl.cnf
   - cat openssl.cnf.patch >> /tmp/openssl.cnf
 script:
-  - py.test
+  - py.test --cov libsmev
+after_success:
+  - coveralls

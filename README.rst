@@ -59,3 +59,6 @@ Windows
 
 .. image:: https://travis-ci.org/barsgroup/libsmev.png   
    :target: https://travis-ci.org/barsgroup/libsmev
+
+.. image:: https://coveralls.io/repos/barsgroup/libsmev/badge.png?branch=master
+   :target: https://coveralls.io/r/barsgroup/libsmev?branch=master
