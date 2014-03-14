@@ -1,5 +1,6 @@
 #coding: utf-8
 
+import uuid
 import base64
 import os
 from tempfile import NamedTemporaryFile
@@ -229,8 +230,9 @@ def construct_wsse_header(digest=None, signature=None, certificate=None):
     reference_node.attrib['URI'] = '#body'
     binary_sec_token_node.attrib['EncodingType'] = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary'
     binary_sec_token_node.attrib['ValueType'] = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3'
-    binary_sec_token_node.attrib['{%s}Id' % NS_MAP['wsu']] = 'CertId'
-    token_reference_node.attrib['URI'] = '#CertId'
+    cert_id = 'CertId-%s' % str(uuid.uuid4())
+    binary_sec_token_node.attrib['{%s}Id' % NS_MAP['wsu']] = cert_id
+    token_reference_node.attrib['URI'] = '#%s' % cert_id
     token_reference_node.attrib['ValueType'] = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3'
 
     sec_token_reference_node.append(token_reference_node)
@@ -286,6 +288,11 @@ def sign_document(doc, priv_key_fn, priv_key_pass, cert_file=None):
     @rtype  lxml.Element
     '''
     header_node = tags(doc, '/SOAP-ENV:Envelope/SOAP-ENV:Header')
+
+    if not header_node:
+        header_node = [etree.Element('{%s}Header' % NS_MAP['SOAP-ENV'])]
+        doc.insert(0, header_node[0])
+
     security_node = tags(doc, '/SOAP-ENV:Envelope/SOAP-ENV:Header/wsse:Security')
 
     if not security_node:
@@ -299,6 +306,14 @@ def sign_document(doc, priv_key_fn, priv_key_pass, cert_file=None):
         header_node[0].append(wsse_header_node)
 
     body_node = tags(doc, '/SOAP-ENV:Envelope/SOAP-ENV:Body')
+    body_id = "Id-%s" % str(uuid.uuid4())
+    body_node[0].attrib['{%s}Id' % NS_MAP['wsu']] = body_id
+
+    reference_node = tags(
+        doc, '/SOAP-ENV:Envelope/SOAP-ENV:Header/wsse:Security/'
+             'ds:Signature/ds:SignedInfo/ds:Reference')
+    reference_node[0].attrib['URI'] = "#%s" % body_id
+
     c14n_body = c14n_tags(body_node[0])
     digest_value = get_text_digest(c14n_body)
 
