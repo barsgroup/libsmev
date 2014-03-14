@@ -22,17 +22,12 @@ def tags(doc, path, ns_map=None):
 
     Существует исключительно для удобства.
 
-    @param  doc     XML-документ, по которому производится выборка.
-    @type   doc     lxml.Element
-
-    @param  path    XPath-выражение.
-    @type   path    unicode
-
-    @param  ns_map  Словарь с пространством имен.
-    @type   dict
-
-    @return Найденные по выражению тэги.
-    @rtype  list of lxml.Element
+    :param  doc:     XML-документ, по которому производится выборка.
+    :type   doc:     lxml.Element
+    :param  unicode path:    XPath-выражение.
+    :param  dict ns_map:  Словарь с пространством имен.    
+    :return: Найденные по выражению тэги.
+    :rtype: list of lxml.Element
     '''
 
     if ns_map is None:
@@ -50,17 +45,12 @@ def tag_single(doc, path, ns_map=None):
 
     Существует исключительно для удобства.
 
-    @param  doc     XML-документ, по которому производится выборка.
-    @type   doc     lxml.Element
-
-    @param  path    XPath-выражение.
-    @type   path    unicode
-
-    @param  ns_map  Словарь с пространством имен.
-    @type   ns_map  dict
-
-    @return Найденный XML-элемент.
-    @rtype  lxml.Element
+    :param  doc:     XML-документ, по которому производится выборка.
+    :type   doc:     lxml.Element
+    :param  unicode path:    XPath-выражение.
+    :param  dict ns_map:  Словарь с пространством имен.
+    :return: Найденный XML-элемент.
+    :rtype:  lxml.Element:
     '''
 
     result = tags(doc, path, ns_map)
@@ -79,14 +69,10 @@ def run_cmd(cmd, input=None):
     u'''
     Выполняем команду в интерпретаторе ОС и считываем выводимые ею данные.
 
-    @param  cmd     Команда для запуска.
-    @type   cmd     unicode
-
-    @param  input   Входные данные, которые будут поданы на stdin.
-    @type   input   unicode
-
-    @return Вывод вызванной программы
-    @rtype  unicode
+    :param  unicode cmd:     Команда для запуска.
+    :param  unicode input:   Входные данные, которые будут поданы на stdin.
+    :return: Вывод вызванной программы
+    :rtype:  unicode
     '''
     pr = subprocess.Popen(
         cmd,
@@ -104,17 +90,11 @@ def parse_xml_string(xml_string, charset=u'utf-8',
 
     По умолчанию используется парсер, удаляющий комментарии из документа.
 
-    @param  xml_string  Строка, содержащая XML-документ.
-    @type   xml_string  unicode
-
-    @param  charset     Кодировка.
-    @type   charset     unicode
-
-    @param  parser      Парсер, используемый для разбора строки.
-    @type   parser      function
-
-    @return Корень XML-документа.
-    @rtype  lxml.Element
+    :param  unicode xml_string:  Строка, содержащая XML-документ.
+    :param  unicode charset:     Кодировка.
+    :param  function parser:     Парсер, используемый для разбора строки.    
+    :return: Корень XML-документа.
+    :rtype:  lxml.Element
     '''
     try:
         try:
@@ -133,11 +113,11 @@ def _from_soap(envelope):
     u'''
     Выделение заголовка и тела SOAP-запроса из XML-документа.
 
-    @param  envelope    XML-документ, содержащий SOAP-запрос.
-    @type   envelope    lxml.Element
+    :param  envelope:    XML-документ, содержащий SOAP-запрос.
+    :type   envelope:    lxml.Element
 
-    @return Заголовок и тело запроса.
-    @rtype  list of lxml.Element
+    :return: Заголовок и тело запроса.
+    :rtype:  list of lxml.Element
     '''
 
     # Выделение из конверта заголовка и тела запроса.
@@ -165,11 +145,11 @@ def extract_smev_parts(envelope):
     u'''
     Выделение из SOAP-запроса относящихся к СМЭВу частей.
 
-    @param  envelope    XML-документ, содержащий SOAP-запрос.
-    @type   envelope    lxml.Element
+    :param  envelope:    XML-документ, содержащий SOAP-запрос.
+    :type   envelope:    lxml.Element
 
-    @return Информация о подписи, заголовок сообщения, сообщение.
-    @rtype  list of lxml.Element
+    :return: Токен, подпись, заголовок сообщения, сообщение.
+    :rtype:  list of lxml.Element
     '''
 
     header, body = _from_soap(envelope)
@@ -193,12 +173,10 @@ def dict_to_xmldoc(node, d, inherited_ns=None):
     Преобразование питоновского словаря в структурированное дерево
     XML-элементов с поддержкой выставления пространства имен.
 
-    @param  node    XML-элемент, к которому будут прикреплены созданные
+    :param  node:    XML-элемент, к которому будут прикреплены созданные
                     элементы.
-    @type   node    lxml.Element
-
-    @param  d   Преобразуемый словарь.
-    @type   d   dict
+    :type   node:    lxml.Element
+    :param  dict d:   Преобразуемый словарь.
     '''
 
     ns = d.get('__ns__', inherited_ns)
@@ -234,15 +212,14 @@ def xmldoc_to_dict(node, include_ns=True, ns_map=REVERSE_NS_MAP):
 
     Обратно совместим с dict_to_xmldoc.
 
-    @param  node    XML-элемент, который преобразуется в словарь.
-    @type   node    lxml.Element
+    :param  node:    XML-элемент, который преобразуется в словарь.
+    :type   node:    lxml.Element
 
-    @param  include_ns  Флаг сокрытия пространств имен элементов из конечного
-                        результата.
-    @type   include_ns  boolean
+    :param  bool include_ns:  Флаг сокрытия пространств имен элементов из конечного
+                              результата.
 
-    @param  ns_map      Карта соответсвия пространств имен кодовым идентификаторам.
-    @type   ns_map      dict вида {'http://schemas.xmlsoap.org/soap/envelope': 'SOAP-ENV'}
+    :param  ns_map:      Карта соответсвия пространств имен кодовым идентификаторам.
+    :type   ns_map:      dict вида {'http://schemas.xmlsoap.org/soap/envelope': 'SOAP-ENV'}
     '''
 
     def get_ns(n):
