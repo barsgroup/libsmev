@@ -14,12 +14,12 @@ Linux
     engines = engine_section
 
     [engine_section]
-    gost = gost_section    
+    gost = gost_section
 
     [gost_section]
     soft_load=1
     default_algorithms = ALL
-    
+
 Теперь можно вызвать алгоритм ГОСТ Р 34.11-94 из консоли следующим образом:
 **openssl dgst -md_gost94 filename**
 
@@ -36,7 +36,7 @@ Windows
     engine_id = gost
     dynamic_path = ./gost.dll
     default_algorithms = ALL
-    
+
 Добавить в переменные окружения путь к конфигу OpenSSL::
 
     OPENSSL_CONF=c:\\OpenSSL-Win32\\bin\\openssl.cfg
@@ -59,8 +59,5 @@ Windows
 
 Статус сборки
 -------------
-.. image:: https://travis-ci.org/barsgroup/libsmev.png   
+.. image:: https://travis-ci.org/barsgroup/libsmev.png
    :target: https://travis-ci.org/barsgroup/libsmev
-
-.. image:: https://coveralls.io/repos/barsgroup/libsmev/badge.png?branch=master
-   :target: https://coveralls.io/r/barsgroup/libsmev?branch=master
