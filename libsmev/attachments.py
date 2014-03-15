@@ -24,7 +24,7 @@ class InvalidFileDigestException(Exception):
 def encode_directory(directory):
     u'''
     Преобразование содержимого папки и её структуры в вид, пригодный для присоединения
-    к СМЭВ-сообщению согласно МР 2.4.4-2.5.6. 
+    к СМЭВ-сообщению согласно МР 2.4.4-2.5.6.
 
     Результатом выполнения будет кортеж с уникальным GUID кодом (поле заголовка RequestCode)
     и закодированный в base64 ZIP-архив с манифестом, файлами директории и соответствующими
@@ -32,11 +32,9 @@ def encode_directory(directory):
 
     ZIP-архив формируется в памяти.
 
-    @param  directory   Путь к папке, содержимое которой необходимо прикрепить.
-    @type   directory   unicode
-
-    @return GUID и закодированный в base64 ZIP-архив.
-    @rtype  (unicode, unicode)    
+    :param  unicode directory:   Путь к папке, содержимое которой необходимо прикрепить.
+    :return: GUID и закодированный в base64 ZIP-архив.
+    :rtype:  (unicode, unicode)
     '''
     # Генерируем код запроса
     request_code = str(uuid.uuid4())
@@ -47,7 +45,7 @@ def encode_directory(directory):
 
     applied_documents_node = make_node('AppliedDocuments')
     for (path, subdirs, files) in os.walk(directory):
-        for fn in files:            
+        for fn in files:
             path_to_file = os.path.join(path, fn).replace('\\', '/').replace('\\\\', '/')
             relative_path = path_to_file[len(directory):].lstrip('/')
             dgst = get_file_digest(path_to_file)
@@ -104,6 +102,16 @@ def extract_directory(request_code, binary_data, destination=None,
                       verify=True, exclude_sigs=True):
     u'''
     Извлечение файлов из закодированного по МР архива вложений.
+    Если не указана папка назначения, то создается временная и распаковка
+    производится в неё.
+
+    :param str request_code: Код заявления.
+    :param str binary_data: Закодированное в base64 содержимое вложения.
+    :param str destination: Папка назначения, куда распаковывается содержимое.
+    :param bool verify: Флаг проверки подписей вложенных файлов.
+    :param bool exclude_sigs: Флаг пропуска файлов подписей (.sig) при распаковке.
+    :return: XML-дерево файла манифеста, путь назначения.
+    :rtype: (lxml.Element, unicode)
     '''
 
     # Распаковываем архив

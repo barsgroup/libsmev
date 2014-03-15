@@ -14,5 +14,3 @@ install:
   - cat openssl.cnf.patch >> /tmp/openssl.cnf
 script:
   - py.test --cov libsmev
-after_success:
-  - coveralls

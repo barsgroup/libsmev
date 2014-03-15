@@ -22,11 +22,9 @@ def _format_pem(data):
     на линии по 64 символа и заключение его в теги для
     передачи OpenSSL.
 
-    @param  data   Текст сертификата, закодированный в base64.
-    @type   unicode
-
-    @returns PEM, содержащий отформатированный сертификат.
-    @rtype    unicode
+    :param unicode data: Текст сертификата, закодированный в base64.
+    :return: PEM, содержащий отформатированный сертификат.
+    :rtype: unicode
     '''
 
     result = []
@@ -47,11 +45,9 @@ def load_cert_from_pem(data):
     Загрузка данных публичного сертификата из PEM-контейнера
     (RFC 1421-1424).
 
-    @param  pem_filename    Имя файла PEM-контейнера.
-    @type   pem_filename    unicode
-
-    @return base64-представление данных сертификата.
-    @rtype  unicode
+    :param unicode pem_filename: Имя файла PEM-контейнера.
+    :return: base64-представление данных сертификата.
+    :rtype:  unicode
     '''
 
     assert data, 'No PEM provided!'
@@ -72,11 +68,9 @@ def load_pubkey_from_pem(data):
     Загрузка данных публичного ключа из PEM-контейнера
     (RFC 1421-1424).
 
-    @param  pem_filename    Имя файла PEM-контейнера.
-    @type   pem_filename    unicode
-
-    @return base64-представление данных публичного ключа.
-    @rtype  unicode
+    :param unicode pem_filename: Имя файла PEM-контейнера.
+    :return: base64-представление данных публичного ключа.
+    :rtype: unicode
     '''
 
     assert data, 'No PEM provided!'
@@ -96,11 +90,9 @@ def c14n_tags(tag):
     Исключительная каноникализация (см. http://www.w3.org/TR/xml-exc-c14n/)
     дерева XML-элементов.
 
-    @param  tag     Корень дерева XML-элементов.
-    @type   tag     lxml.Element
-
-    @return Строковое представление каноникализированной формы XML-дерева.
-    @rtype  unicode
+    :param lxml.Element tag: Корень дерева XML-элементов.
+    :return: Строковое представление каноникализированной формы XML-дерева.
+    :rtype: unicode
     '''
 
     return etree.tostring(tag, method='c14n', exclusive=True, with_comments=False)
@@ -111,17 +103,12 @@ def get_text_signature(text, private_key_fn, private_key_pass):
     Получение ЭП указанного текста через вызов внешнего экземпляра OpenSSL,
     с использованием частного ключа ОИВ.
 
-    @param  text    Подписываемый текст.
-    @type   text    unicode
+    :param unicode text: Подписываемый текст.
+    :param unicode private_key_fn: Путь к PEM-файлу, содержащему частный ключ.
+    :param unicode private_key_pass: Пароль к частному ключу.
 
-    @param  private_key_fn  Путь к PEM-файлу, содержащему частный ключ.
-    @param  private_key_fn  unicode
-
-    @param  private_key_pass    Пароль к частному ключу.
-    @type   private_key_pass    unicode
-
-    @return Закодированная в base64 ЭП текста.
-    @rtype  unicode
+    :return: Закодированная в base64 ЭП текста.
+    :rtype: unicode
     '''
     openssl_sign_cmd = [
         'openssl', 'dgst', '-sign', private_key_fn, '-binary',
@@ -139,11 +126,9 @@ def get_text_digest(text):
     Получение текстового представления хэш-кода переданного текста
     по ГОСТ Р 34.11-94.
 
-    @param  text    Текст, хэш-код которого необходимо получить.
-    @type   text    unicode
-
-    @return Закодированный в base64 хэш-код текста.
-    @rtype  unicode
+    :param unicode text: Текст, хэш-код которого необходимо получить.
+    :return: Закодированный в base64 хэш-код текста.
+    :rtype:  unicode
     '''
     openssl_sign_cmd = ['openssl', 'dgst', '-binary', '-md_gost94']
 
@@ -159,11 +144,9 @@ def get_file_digest(fn):
     Получение текстового представления хэш-кода переданного файла
     по ГОСТ Р 34.11-94.
 
-    @param  fn    Путь к файлу, хэш-код которого необходимо получить.
-    @type   fn    unicode
-
-    @return Закодированный в base64 хэш-код текста.
-    @rtype  unicode
+    :param unicode fn: Путь к файлу, хэш-код которого необходимо получить.
+    :return: Закодированный в base64 хэш-код текста.
+    :rtype: unicode
     '''
     openssl_sign_cmd = ['openssl', 'dgst', '-binary', '-md_gost94', fn]
 
@@ -178,17 +161,12 @@ def construct_wsse_header(digest=None, signature=None, certificate=None):
     u'''
     Формирование в виде дерева XML-элементов заголовка WS-Security.
 
-    @param  digest  Хэш-код подписи элементов сообщения.
-    @type   digest  unicode
+    :param unicode digest: Хэш-код подписи элементов сообщения.
+    :param unicode signature: ЭП сообщения.
+    :param unicode certificate: Открытый ключ сообщения.
 
-    @param  signature ЭП сообщения.
-    @type   signature unicode
-
-    @param  certificate     Открытый ключ сообщения.
-    @type   certificate     unicode
-
-    @return WS-Security заголовок.
-    @rtype  lxml.Element
+    :return: WS-Security заголовок.
+    :rtype: lxml.Element
     '''
     ds_node = make_node_with_ns('ds')
     wsse_node = make_node_with_ns('wsse')
@@ -272,20 +250,13 @@ def sign_document(doc, priv_key_fn, priv_key_pass, cert_file=None):
     u'''
     Подписание сообщения без вложения согласно ГОСТ Р 34.10-2001.
 
-    @param  doc     Подписываемый XML-документ, содержащий себе в себе СМЭВ-сообщение.
-    @type   doc     lxml.Element
+    :param lxml.Element doc: Подписываемый XML-документ, содержащий себе в себе СМЭВ-сообщение.
+    :param unicode priv_key_fn: Путь к файлу с частному ключу подписи.
+    :param unicode priv_key_pass: Пароль к частному ключу подписи.
+    :param unicode cert_file: Путь к файлу с сертификатом.
 
-    @param  priv_key_fn     Путь к файлу с частному ключу подписи.
-    @type   priv_key_fn     unicode
-
-    @param  priv_key_pass   Пароль к частному ключу подписи.
-    @type   priv_key_pass   unicode
-
-    @param cert_file    Путь к файлу с сертификатом.
-    @type cert_file     unicode
-
-    @return Подписанный XML-документ.
-    @rtype  lxml.Element
+    :return: Подписанный XML-документ.
+    :rtype:  lxml.Element
     '''
     header_node = tags(doc, '/SOAP-ENV:Envelope/SOAP-ENV:Header')
 
@@ -299,7 +270,7 @@ def sign_document(doc, priv_key_fn, priv_key_pass, cert_file=None):
         if cert_file is not None:
             with open(cert_file, 'rb') as cert_file_fh:
                 cert_data = load_cert_from_pem(cert_file_fh.read())
-        else:            
+        else:
             with open(priv_key_fn, 'rb') as priv_key_file:
                 cert_data = load_cert_from_pem(priv_key_file.read())
         wsse_header_node = construct_wsse_header(certificate=cert_data)
@@ -334,17 +305,12 @@ def verify_gost94_signature(text, public_key, signature_value):
     u'''
     Проверка корректности ЭП переданного текста по ГОСТ Р 34.11-94.
 
-    @param  text    Текст, подпись которого проверяется.
-    @type   text    unicode
+    :param unicode text: Текст, подпись которого проверяется.
+    :param unicode public_key: Публичный ключ, которым подписывался текст.
+    :param unicode signature_value: Подпись.
 
-    @param  public_key  Публичный ключ, которым подписывался текст.
-    @type   public_key  unicode
-
-    @param  signature_value Подпись.
-    @type   signature_value unicode
-
-    @return Флаг корректности ЭП текста.
-    @type   boolean
+    :return: Флаг корректности ЭП текста.
+    :type: boolean
     '''
 
     # Так как OpenSSL не умеет считывать значения подписи и проверяемый
@@ -379,11 +345,9 @@ def verify_envelope_signature(envelope):
     u'''
     Проверка подписи SOAP-запроса по ГОСТ Р 34.11-94.
 
-    @param envelope     Подписанный XML-документ.
-    @type  envelope     lxml.Element
-
-    @return Флаг корректности подписи документа.
-    @rtype  boolean
+    :param lxml.Element envelope: Подписанный XML-документ.
+    :return: Флаг корректности подписи документа.
+    :rtype: boolean
     '''
 
     header, body = _from_soap(envelope)

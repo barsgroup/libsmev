@@ -28,17 +28,12 @@ def convert_smev_request(envelope, from_ver='2.5.6', to_ver=None):
     Внимание: преобразование происходит прямо над переданным объектом,
     _не_ над копией.
 
-    @param  envelope    Преобразуемое СМЭВ сообщение в виде дерева XML.
-    @type   envelope    lxml.Element
+    :param  lxml.Element envelope: Преобразуемое СМЭВ сообщение в виде дерева XML.
+    :param  unicode from_ver: Версия переданного сообщения.
+    :param  unicode from_ver: Версия, в которую необходимо преобразовать сообщение.
 
-    @param  from_ver    Версия переданного сообщения.
-    @type   from_ver    unicode
-
-    @param  from_ver    Версия, в которую необходимо преобразовать сообщение.
-    @type   from_ver    unicode
-
-    @return Преобразованное СМЭВ-сообщение.
-    @rtype  lxml.Element
+    :return: Преобразованное СМЭВ-сообщение.
+    :rtype: lxml.Element
     '''
 
     smev_node = make_node_with_ns('smev')
@@ -68,13 +63,17 @@ def convert_smev_request(envelope, from_ver='2.5.6', to_ver=None):
 
 def create_empty_context(version='2.5.6'):
     u'''
-    Создание пустого контекста запроса, используемого для формирования 
-    СМЭВ-сообщения. В зависимости от версии, набор необходимых полей может 
+    Создание пустого контекста запроса, используемого для формирования
+    СМЭВ-сообщения. В зависимости от версии, набор необходимых полей может
     меняться. По умолчанию формируется контекст для создания сообщения
     по версии 2.5.6 МР и проставляется флаг тестового взаимодействия.
 
     В случае запроса формирования контекста по неподдерживаемой нами
-    версии МР - выьрасывается исключение.
+    версии МР - выбрасывается исключение.
+
+    :param str version: Версия МР, для которой создается контекст.
+    :return: Словарь контекста.
+    :rtype: dict
     '''
 
     blanks = {
@@ -126,17 +125,15 @@ def create_empty_context(version='2.5.6'):
 def extract_context_from_envelope(envelope):
     u'''
     Формирование контекста на основе данных из существующего сообщения СМЭВ.
-    На данный момент поддерживается только обработка структуры сообщений по 
+    На данный момент поддерживается только обработка структуры сообщений по
     МР версии 2.5.6.
 
     Если какой-либо из элементов содержит текст "true" или "false", то значение
     будет заменено на True или False соответственно.
 
-    @param  envelope    Сообщение СМЭВ.
-    @type   envelope    lxml.Element
-
-    @return Словарь контекста.
-    @rtype  dict
+    :param  lxml.Element envelope: Сообщение СМЭВ.
+    :return: Словарь контекста.
+    :rtype: dict
 
     '''
 
@@ -177,21 +174,14 @@ def construct_smev_envelope(action_name, context, nsmap=None, version='2.5.6'):
     Составления обертки СМЭВ-сообщения на основе переданного контекста и имени
     блока с данными.
 
-    @param  action_name     Имя блока, содержащего данные сообщения.
-    @type   action_name     unicode
-
-    @param  context     Словарь с данными заголовка СМЭВ-сообщения.
-    @type   context     dict
-
-    @param  nsmap   Карта пространств имен XML-документа.
-    @type   nsmap   dict
-
-    @param  version     Версия методических рекомендаций, используемая при 
+    :param unicode action_name: Имя блока, содержащего данные сообщения.
+    :param dict context: Словарь с данными заголовка СМЭВ-сообщения.
+    :param dict nsmap: Карта пространств имен XML-документа.
+    :param str version: Версия методических рекомендаций, используемая при
                         создании обертки сообщения.
-    @type   version     unicode
 
-    @return Созданное СМЭВ-сообщение.
-    @rtype  lxml.Element
+    :return: Созданное СМЭВ-сообщение.
+    :rtype: lxml.Element
     '''
 
     required_fields = [
@@ -265,7 +255,7 @@ def construct_smev_envelope(action_name, context, nsmap=None, version='2.5.6'):
         service_version_node = etree.Element("{%s}Version" % _ns_map['smev'])
         service_mnemonic_node.text = context['Service']['Mnemonic']
         service_version_node.text = context['Service']['Version']
-        
+
         service_node.extend([
             service_mnemonic_node,
             service_version_node])
@@ -369,23 +359,16 @@ def construct_smev_envelope(action_name, context, nsmap=None, version='2.5.6'):
 
 def construct_error_reply(original_req, err_code, msg, custom_status=None):
     u'''
-    Создание ответ на СМЭВ-сообщение, который будет содержать в себе 
+    Создание ответ на СМЭВ-сообщение, который будет содержать в себе
     код и сообщение об ошибке.
 
-    @param  original_req    СМЭВ-сообщение, на которое формируется ответ.
-    @type   original_req    lxml.Element
+    :param lxml.Element original_req: СМЭВ-сообщение, на которое формируется ответ.
+    :param unicode err_code: Код сообщения об ошибке.
+    :param unicode msg: Текст сообщения об ошибке.
+    :param unicode custom_status: Статус в заголовке СМЭВ-сообщения.
 
-    @param  err_code    Код сообщения об ошибке.
-    @type   err_code    unicode
-
-    @param  msg    Текст сообщения об ошибке.
-    @type   msg    unicode
-
-    @param  custom_status    Статус в заголовке СМЭВ-сообщения.
-    @type   custom_status    unicode
-
-    @return Ответное сообщение об ошибке.
-    @rtype  lxml.Element
+    :return: Ответное сообщение об ошибке.
+    :rtype:  lxml.Element
     '''
 
     reply_ctx = extract_context_from_envelope(original_req)
@@ -405,7 +388,7 @@ def construct_error_reply(original_req, err_code, msg, custom_status=None):
     appdata_node = tag_single(reply_req, './/smev:AppData')
 
     dict_to_xmldoc(appdata_node, {
-                   '__ns__': 'inf', 
+                   '__ns__': 'inf',
                    'Error': dict(errorCode=err_code, errorMessage=msg)})
 
     return reply_req
