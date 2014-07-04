@@ -9,7 +9,7 @@ def read(fn):
 
 setup(
     name='libsmev',
-    version='0.1.6.3',
+    version='0.1.6.4',
     author='Borisov Kirill',
     author_email='borisov@bars-open.ru',
     description=("Library of low-level helpers that make integration with SMEV "
@@ -18,7 +18,7 @@ setup(
     keywords="smev m3 bars",
     long_description=read('README.rst'),
     packages=['libsmev'],
-    install_requires=['lxml >= 3.1.0', 'requests >= 1.2.0'],
+    install_requires=['lxml >= 3.1.0'],
     classifiers=(
         'Development Status :: 4 - Beta',
         'Environment :: Console',
