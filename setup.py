@@ -8,7 +8,7 @@ def read(fn):
     return open(os.path.join(os.path.dirname(__file__), fn)).read()
 
 setup(
-    name='libsmev',
+    name='m3-libsmev',
     version='0.1.6.4',
     author='Borisov Kirill',
     author_email='borisov@bars-open.ru',
@@ -20,12 +20,13 @@ setup(
     packages=['libsmev'],
     install_requires=['lxml >= 3.1.0'],
     classifiers=(
-        'Development Status :: 4 - Beta',
-        'Environment :: Console',
         'Intended Audience :: Developers',
+        'Environment :: Web Environment',
         'Natural Language :: Russian',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2.6',
-        'Topic :: Software Development :: Libraries',
-        'Topic :: Utilities')
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'License :: OSI Approved :: MIT License',
+        'Development Status :: 5 - Production/Stable',
+    )
 )
